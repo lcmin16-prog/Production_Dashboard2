@@ -1969,7 +1969,6 @@ def create_shared_filter_controls(df_for_current_tab):
     with filter_cols[0]:
         st.date_input(
             "조회할 기간을 선택하세요",
-            value=(safe_start, safe_end),
             min_value=min_date_global,
             max_value=max_date_global,
             key='date_range'
