@@ -17,7 +17,7 @@ from chart_utils import (
 )
 
 # --- 페이지 기본 설정 ---
-st.set_page_config(layout="wide", page_title="지능형 생산 대시보드 V105", page_icon="👑")
+st.set_page_config(layout="wide", page_title="지능형 생산 대시보드 2021~2022 전용", page_icon="👑")
 
 # --- 화면 너비에 따른 동적 배율 조정 ---
 st.markdown("""
@@ -1003,7 +1003,7 @@ def set_maximum_period(min_data_date, max_data_date):
     st.session_state.range_reference_date = max_data_date
 
 # --- 대시보드 UI 시작 ---
-st.title("👑 지능형 생산 대시보드 V105")
+st.title("👑 지능형 생산 대시보드 2021~2022 전용")
 
 all_data = load_all_data()
 df_target_orig, target_filename = all_data.get('target', (pd.DataFrame(), None)); df_yield_orig, yield_filename = all_data.get('yield', (pd.DataFrame(), None)); df_utilization_orig, util_filename = all_data.get('utilization', (pd.DataFrame(), None)); df_defect_orig, defect_filename = all_data.get('defect', (pd.DataFrame(), None))
