@@ -94,7 +94,16 @@ def load_all_data() -> Dict[str, Tuple[pd.DataFrame, Optional[str]]]:
                 # (간편) 표기가 없는 최신 파일을 우선 선택
                 non_simple_files = [f for f in relevant_files if '간편' not in f]
                 search_pool = non_simple_files if non_simple_files else relevant_files
-                latest_file = max(search_pool, key=lambda f: os.path.getmtime(os.path.join(current_directory, f)))
+
+                # 21~22 전용 패키지에서는 통합 수율 파일을 우선 사용해 연도 누락을 방지
+                if key == 'yield':
+                    preferred_pattern = r'^생산실적현황\(수율\)\.(csv|xlsx|xls)$'
+                    preferred_files = [f for f in search_pool if re.match(preferred_pattern, f)]
+                    latest_file = preferred_files[0] if preferred_files else max(
+                        search_pool, key=lambda f: os.path.getmtime(os.path.join(current_directory, f))
+                    )
+                else:
+                    latest_file = max(search_pool, key=lambda f: os.path.getmtime(os.path.join(current_directory, f)))
 
                 file_path = os.path.join(current_directory, latest_file)
                 file_ext = os.path.splitext(latest_file)[1].lower()
@@ -1063,9 +1072,13 @@ if 'range_reference_date' not in st.session_state:
     default_reference = st.session_state.date_range[1] if 'date_range' in st.session_state else date.today()
     st.session_state.range_reference_date = default_reference
 
-st.sidebar.header("로딩된 파일 정보"); st.sidebar.info(f"목표: {target_filename}" if target_filename else "파일 없음"); st.sidebar.info(f"수율: {yield_filename}" if yield_filename else "파일 없음"); st.sidebar.info(f"가동률: {util_filename}" if util_filename else "파일 없음"); st.sidebar.info(f"불량: {defect_filename}" if defect_filename else "파일 없음")
+st.sidebar.header("로딩된 파일 정보")
+st.sidebar.info(f"수율: {yield_filename}" if yield_filename else "수율: 파일 없음")
+st.sidebar.info(f"목표: {target_filename}" if target_filename else "목표: 미사용 (21~22 전용 구성)")
+st.sidebar.info(f"가동률: {util_filename}" if util_filename else "가동률: 미사용 (21~22 전용 구성)")
+st.sidebar.info(f"불량: {defect_filename}" if defect_filename else "불량: 미사용 (21~22 전용 구성)")
 
-tab_list = ["?? ??", "???? ????"]
+tab_list = ["수율 분석", "생산실적 상세조회"]
 selected_tab = st.radio("메인 네비게이션", tab_list, key='main_tab_selector', horizontal=True, label_visibility='collapsed')
 
 # === 탭 전환 감지 및 설정 보정 시스템 ===
@@ -5144,7 +5157,7 @@ elif selected_tab == "생산실적 상세조회":
                     if sel_processes:
                         temp_data_2 = temp_data_2[temp_data_2['공정코드'].isin(sel_processes)]
                     
-                    categories = sorted(temp_data_2['신규분류요약'].dropna().unique()) if '신규뵤류요약' in temp_data_2.columns else []
+                    categories = sorted(temp_data_2['신규분류요약'].dropna().unique()) if '신규분류요약' in temp_data_2.columns else []
                     sel_categories = st.multiselect("제품군", categories, key="detail_categories")
                     
                     # 제품군 선택에 따른 제품 필터링
